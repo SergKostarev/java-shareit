@@ -6,4 +6,6 @@ public interface UserRepository {
     User update(User newUser);
 
     User getById(Long id);
+
+    User delete(Long id);
 }

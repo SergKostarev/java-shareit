@@ -26,9 +26,9 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto update(Long userId, ItemUpdateDto newItemDto) {
+    public ItemDto update(Long userId, Long itemId, ItemUpdateDto newItemDto) {
         User owner = userRepository.getById(userId);
-        Item newItem = ItemMapper.toItem(newItemDto, owner, null); // TODO itemRequest
+        Item newItem = ItemMapper.toItem(itemId, newItemDto, owner, null); // TODO itemRequest
         return ItemMapper.toItemDto(itemRepository.update(newItem));
     }
 
@@ -56,5 +56,11 @@ public class ItemServiceImpl implements ItemService {
                 .stream()
                 .map(ItemMapper::toItemDto)
                 .toList();
+    }
+
+    @Override
+    public ItemDto delete(Long id) {
+        Item item = itemRepository.delete(id);
+        return ItemMapper.toItemDto(item);
     }
 }

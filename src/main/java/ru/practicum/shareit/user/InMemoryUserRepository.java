@@ -2,6 +2,7 @@ package ru.practicum.shareit.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
+import ru.practicum.shareit.exception.DuplicatedDataException;
 import ru.practicum.shareit.exception.NotFoundException;
 
 import java.util.HashMap;
@@ -17,7 +18,9 @@ public class InMemoryUserRepository implements UserRepository {
 
     @Override
     public User create(User user) {
-        Long id = identifier++;
+        emailCheck(user.getEmail());
+        identifier++;
+        Long id = identifier;
         log.debug("Создание нового пользователя с идентификатором " + id);
         user.setId(id);
         users.put(id, user);
@@ -28,8 +31,12 @@ public class InMemoryUserRepository implements UserRepository {
     public User update(User newUser) {
         User oldUser = getById(newUser.getId());
         log.debug("Обновление пользователя с идентификатором " + newUser.getId());
-        if (!newUser.getName().isEmpty() && !newUser.getName().isBlank()) {
-            oldUser.setName(newUser.getName()); // update name only?
+        if (newUser.getName() != null && !newUser.getName().isBlank()) {
+            oldUser.setName(newUser.getName());
+        }
+        if (newUser.getEmail() != null && !newUser.getEmail().isBlank()) {
+            emailCheck(newUser.getEmail());
+            oldUser.setEmail(newUser.getEmail());
         }
         return oldUser;
     }
@@ -43,5 +50,24 @@ public class InMemoryUserRepository implements UserRepository {
         }
         log.debug("Пользователь с идентификатором " + id + " не найден.");
         throw new NotFoundException("Пользователь не найден.", id);
+    }
+
+    @Override
+    public User delete(Long id) {
+        User user = getById(id);
+        users.remove(id);
+        return user;
+    }
+
+    private void emailCheck(String email) {
+        Optional<User> user = users
+                            .values()
+                            .stream()
+                            .filter(u -> u.getEmail().equals(email))
+                            .findAny();
+        if (user.isPresent()) {
+            throw new DuplicatedDataException("Данный адрес электронной почты уже используется.",
+                    user.get().getEmail());
+        }
     }
 }

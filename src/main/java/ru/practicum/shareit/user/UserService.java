@@ -17,12 +17,17 @@ public class UserService {
         return UserMapper.toUserDto(userRepository.create(user));
     }
 
-    public UserDto update(UserUpdateDto newUserDto) {
-        User newUser = UserMapper.toUser(newUserDto);
+    public UserDto update(Long id, UserUpdateDto newUserDto) {
+        User newUser = UserMapper.toUser(id, newUserDto);
         return UserMapper.toUserDto(userRepository.update(newUser));
     }
 
     public UserDto getById(Long id) {
         return UserMapper.toUserDto(userRepository.getById(id));
+    }
+
+    public UserDto delete(Long id) {
+        User user = userRepository.delete(id);
+        return UserMapper.toUserDto(user);
     }
 }

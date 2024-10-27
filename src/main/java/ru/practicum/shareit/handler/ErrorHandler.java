@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ru.practicum.shareit.exception.DuplicatedDataException;
 import ru.practicum.shareit.exception.NotAuthorizedException;
 import ru.practicum.shareit.exception.NotFoundException;
 
@@ -22,6 +23,12 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorResponse handleNotAuthorized(NotAuthorizedException e) {
         return new ErrorResponse(e.getMessage(), String.valueOf(e.getEntityId()));
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleDuplicatedData(DuplicatedDataException e) {
+        return new ErrorResponse(e.getMessage(), e.getData());
     }
 
 }

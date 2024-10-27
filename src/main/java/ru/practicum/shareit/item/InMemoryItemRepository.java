@@ -17,7 +17,8 @@ public class InMemoryItemRepository implements ItemRepository {
 
     @Override
     public Item create(Item item) {
-        Long id = identifier++;
+        identifier++;
+        Long id = identifier;
         log.debug("Создание новой вещи с идентификатором " + id);
         item.setId(id);
         items.put(id, item);
@@ -35,12 +36,10 @@ public class InMemoryItemRepository implements ItemRepository {
                     newItem.getOwner().getId(), newItem.getId());
         }
         log.debug("Обновление вещи с идентификатором " + newItem.getId());
-        if (newItem.getName() != null && !newItem.getName().isEmpty()
-                && !newItem.getName().isBlank()) {
+        if (newItem.getName() != null && !newItem.getName().isBlank()) {
             oldItem.setName(newItem.getName());
         }
-        if (newItem.getDescription() != null && !oldItem.getDescription().isEmpty()
-                && !oldItem.getDescription().isBlank()) {
+        if (newItem.getDescription() != null && !oldItem.getDescription().isBlank()) {
             oldItem.setDescription(newItem.getDescription());
         }
         if (newItem.getAvailable() != null) {
@@ -73,12 +72,22 @@ public class InMemoryItemRepository implements ItemRepository {
     @Override
     public Collection<Item> search(String text) {
         log.debug("Поиск вещей по тексту.");
+        if (text.isBlank()) {
+            return List.of();
+        }
         return items
                 .values()
                 .stream()
                 .filter(Item::getAvailable)
-                .filter(i -> i.getName().contains(text)
-                    || i.getDescription().contains(text))
+                .filter(i -> i.getName().toLowerCase().contains(text.toLowerCase())
+                    || i.getDescription().toLowerCase().contains(text.toLowerCase()))
                 .toList();
+    }
+
+    @Override
+    public Item delete(Long id) {
+        Item item = getById(id);
+        items.remove(id);
+        return item;
     }
 }

@@ -29,9 +29,9 @@ public class ItemMapper {
         );
     }
 
-    public static Item toItem(ItemUpdateDto itemUpdateDto, User owner, ItemRequest itemRequest) {
+    public static Item toItem(Long id, ItemUpdateDto itemUpdateDto, User owner, ItemRequest itemRequest) {
         return new Item(
-                itemUpdateDto.getId(),
+                id,
                 itemUpdateDto.getName(),
                 itemUpdateDto.getDescription(),
                 itemUpdateDto.getAvailable(),

@@ -14,4 +14,6 @@ public interface ItemRepository {
     Collection<Item> getAllItems(Long userId);
 
     Collection<Item> search(String text);
+
+    Item delete(Long id);
 }
