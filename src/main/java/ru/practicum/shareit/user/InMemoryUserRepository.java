@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.DuplicatedDataException;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.user.model.User;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +15,7 @@ import java.util.Optional;
 public class InMemoryUserRepository implements UserRepository {
 
     private final Map<Long, User> users = new HashMap<>();
-    private static Long identifier = 0L;
+    private Long identifier = 0L;
 
     @Override
     public User create(User user) {
@@ -43,13 +44,15 @@ public class InMemoryUserRepository implements UserRepository {
 
     @Override
     public User getById(Long id) {
-        Optional<User> user = Optional.ofNullable(users.get(id));
-        if (user.isPresent()) {
-            log.debug("Получение пользователя с идентификатором " + id);
-            return user.get();
-        }
-        log.debug("Пользователь с идентификатором " + id + " не найден.");
-        throw new NotFoundException("Пользователь не найден.", id);
+        return Optional.ofNullable(users.get(id))
+                .map(user -> {
+                    log.debug("Получение пользователя с идентификатором " + id);
+                    return user;
+                })
+                .orElseThrow(() -> {
+                    log.debug("Пользователь с идентификатором " + id + " не найден.");
+                    return new NotFoundException("Пользователь не найден.", id);
+                });
     }
 
     @Override

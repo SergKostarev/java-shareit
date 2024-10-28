@@ -13,7 +13,7 @@ import java.util.*;
 public class InMemoryItemRepository implements ItemRepository {
 
     private final Map<Long, Item> items = new HashMap<>();
-    private static Long identifier = 0L;
+    private Long identifier = 0L;
 
     @Override
     public Item create(Item item) {
@@ -50,13 +50,15 @@ public class InMemoryItemRepository implements ItemRepository {
 
     @Override
     public Item getById(Long itemId) {
-        Optional<Item> item = Optional.ofNullable(items.get(itemId));
-        if (item.isPresent()) {
-            log.debug("Получение вещи с идентификатором " + itemId);
-            return item.get();
-        }
-        log.debug("Вещь с идентификатором " + itemId + " не найдена.");
-        throw new NotFoundException("Вещь не найдена.", itemId);
+        return Optional.ofNullable(items.get(itemId))
+                .map(item -> {
+                    log.debug("Получение вещи с идентификатором " + itemId);
+                    return item;
+                })
+                .orElseThrow(() -> {
+                    log.debug("Вещь с идентификатором " + itemId + " не найдена.");
+                    return new NotFoundException("Вещь не найдена.", itemId);
+                });
     }
 
     @Override
