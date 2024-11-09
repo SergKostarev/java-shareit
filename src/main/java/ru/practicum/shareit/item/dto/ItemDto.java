@@ -15,5 +15,4 @@ public class ItemDto {
     private final String description;
     @NotNull
     private final Boolean available;
-    private final Long request;
 }

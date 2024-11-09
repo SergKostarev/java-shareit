@@ -13,30 +13,27 @@ public class ItemMapper {
                 item.getId(),
                 item.getName(),
                 item.getDescription(),
-                item.getAvailable(),
-                item.getRequest() != null ? item.getRequest().getId() : null
+                item.getAvailable()
         );
     }
 
     public static Item toItem(ItemDto itemDto, User owner, ItemRequest itemRequest) {
-        return new Item(
-                itemDto.getId(),
-                itemDto.getName(),
-                itemDto.getDescription(),
-                itemDto.getAvailable(),
-                owner,
-                itemRequest
-        );
+        Item item = new Item();
+        item.setId(itemDto.getId());
+        item.setName(itemDto.getName());
+        item.setDescription(itemDto.getDescription());
+        item.setAvailable(itemDto.getAvailable());
+        item.setOwner(owner);
+        return item;
     }
 
     public static Item toItem(Long id, ItemUpdateDto itemUpdateDto, User owner, ItemRequest itemRequest) {
-        return new Item(
-                id,
-                itemUpdateDto.getName(),
-                itemUpdateDto.getDescription(),
-                itemUpdateDto.getAvailable(),
-                owner,
-                itemRequest
-        );
+        Item item = new Item();
+        item.setId(id);
+        item.setName(itemUpdateDto.getName());
+        item.setDescription(itemUpdateDto.getDescription());
+        item.setAvailable(itemUpdateDto.getAvailable());
+        item.setOwner(owner);
+        return item;
     }
 }
