@@ -5,15 +5,9 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class ItemDto {
+public class CreateCommentDto {
     private final Long id;
     @NotNull
     @NotBlank
-    private final String name;
-    @NotNull
-    @NotBlank
-    private final String description;
-    @NotNull
-    private final Boolean available;
-    private final Long requestId;
+    private final String text;
 }

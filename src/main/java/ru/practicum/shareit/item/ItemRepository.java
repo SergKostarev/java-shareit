@@ -1,19 +1,28 @@
 package ru.practicum.shareit.item;
 
+import com.querydsl.core.types.dsl.BooleanExpression;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.model.QItem;
 
 import java.util.Collection;
 
-public interface ItemRepository {
-    Item create(Item item);
+public interface ItemRepository extends JpaRepository<Item, Long>, QuerydslPredicateExecutor<Item> {
 
-    Item update(Item newItem);
+    Collection<Item> findByOwnerId(Long ownerId);
 
-    Item getById(Long itemId);
+    default Iterable<Item> searchByAvailableAndNameOrDescription (String text) {
+        BooleanExpression byName = QItem.item.name.containsIgnoreCase(text);
+        BooleanExpression byDescription = QItem.item.description.containsIgnoreCase(text);
+        BooleanExpression byAvailable = QItem.item.available.isTrue();
+        Iterable<Item> foundItems = findAll(byAvailable.and(byName.or(byDescription)));
+        return foundItems;
+    }
 
-    Collection<Item> getAllItems(Long userId);
-
-    Collection<Item> search(String text);
-
-    Item delete(Long id);
+    default Item getItemById(Long itemId) {
+        return findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Вещь не найдена.", itemId));
+    }
 }
