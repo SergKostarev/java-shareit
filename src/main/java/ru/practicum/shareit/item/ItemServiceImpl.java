@@ -92,8 +92,8 @@ public class ItemServiceImpl implements ItemService {
                 .findAllByItemIdIn(items.keySet())
                 .stream()
                 .collect(Collectors.groupingBy(c -> c.getItem().getId()));
-        return itemRepository
-                .findByOwnerId(userId)
+        return items
+                .values()
                 .stream()
                 .map(i -> ItemMapper.toItemDateDto(i, bookings.getOrDefault(i.getId(), List.of()),
                         comments.getOrDefault(i.getId(), List.of())))

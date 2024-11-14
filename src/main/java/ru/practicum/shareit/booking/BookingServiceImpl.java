@@ -76,7 +76,8 @@ public class BookingServiceImpl implements BookingService{
             throw new NotAuthorizedException(e.getMessage(),
                     e.getId(), bookingId);
         }
-        Booking booking = bookingRepository.getBookingById(bookingId);
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new NotFoundException("Бронирование не найдено.", bookingId));
         if (!booking.getItem().getOwner().getId().equals(userId)) {
             log.debug("Пользователь с идентификатором " + userId +
                     " не является владельцем вещи с идентификатором " + booking.getItem().getId()
@@ -92,7 +93,8 @@ public class BookingServiceImpl implements BookingService{
     public BookingDto getById(Long userId, Long bookingId) {
         log.debug("Получение бронирования с идентификатором " + bookingId);
         userRepository.getUserById(userId);
-        Booking booking = bookingRepository.getBookingById(bookingId);
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new NotFoundException("Бронирование не найдено.", bookingId));
         if (!(booking.getItem().getOwner().getId().equals(userId)
                 || booking.getBooker().getId().equals(userId))) {
             log.debug("Пользователь с идентификатором " + userId

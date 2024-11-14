@@ -2,20 +2,22 @@ package ru.practicum.shareit.booking;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.exception.NotFoundException;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public interface BookingRepository extends JpaRepository<Booking, Long>, QuerydslPredicateExecutor<Booking> {
 
-    default Booking getBookingById(Long bookingId) {
-        return findById(bookingId)
-                .orElseThrow(() -> new NotFoundException("Бронирование не найдено.", bookingId));
-    }
+    @Query(" select b " +
+            "from Booking b " +
+            "JOIN FETCH b.item " +
+            "where b.id = ?1")
+    Optional<Booking> findById(Long id);
 
     List<Booking> findByBookerId(Long bookerId, Sort sort);
 
@@ -45,9 +47,5 @@ public interface BookingRepository extends JpaRepository<Booking, Long>, Queryds
             Long itemId, LocalDateTime end, LocalDateTime start, Set<BookingStatus> status);
 
     List<Booking> findByBookerIdAndItemIdAndEndIsBefore(Long bookerId, Long itemId, LocalDateTime end);
-
-    List<Booking> findByItemIdAndStartIsAfter(Long itemId, LocalDateTime start);
-
-    List<Booking> findByItemIdAndStartIsBefore(Long itemId, LocalDateTime end);
 
 }
