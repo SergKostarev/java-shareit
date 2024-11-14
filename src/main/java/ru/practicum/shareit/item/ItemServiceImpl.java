@@ -128,8 +128,8 @@ public class ItemServiceImpl implements ItemService {
     public CommentDto comment(Long userId, Long itemId, CreateCommentDto commentDto) {
         User author = userRepository.getUserById(userId);
         Item item = itemRepository.getItemById(itemId);
-        List<Booking> bookings = bookingRepository.
-                findByBookerIdAndItemIdAndEndIsBefore(userId, itemId, LocalDateTime.now());
+        List<Booking> bookings = bookingRepository
+                .findByBookerIdAndItemIdAndEndIsBefore(userId, itemId, LocalDateTime.now());
         if (bookings.isEmpty()) {
             log.debug("Не найдены завершенные бронирования" +
                     " вещи с идентификатором " + itemId +

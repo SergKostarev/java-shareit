@@ -13,7 +13,7 @@ public interface ItemRepository extends JpaRepository<Item, Long>, QuerydslPredi
 
     Collection<Item> findByOwnerId(Long ownerId);
 
-    default Iterable<Item> searchByAvailableAndNameOrDescription (String text) {
+    default Iterable<Item> searchByAvailableAndNameOrDescription(String text) {
         BooleanExpression byName = QItem.item.name.containsIgnoreCase(text);
         BooleanExpression byDescription = QItem.item.description.containsIgnoreCase(text);
         BooleanExpression byAvailable = QItem.item.available.isTrue();

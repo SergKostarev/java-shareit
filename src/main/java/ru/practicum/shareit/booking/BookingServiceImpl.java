@@ -29,7 +29,7 @@ import static ru.practicum.shareit.booking.BookingStatus.*;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class BookingServiceImpl implements BookingService{
+public class BookingServiceImpl implements BookingService {
 
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
@@ -53,8 +53,8 @@ public class BookingServiceImpl implements BookingService{
             throw new UnavailableEntityException("Вещь недоступна ",
                     item.getId().toString());
         }
-        Booking activeBooking = bookingRepository.
-                findByItemIdAndEndIsAfterAndStartIsBeforeAndStatusIn(
+        Booking activeBooking = bookingRepository
+                .findByItemIdAndEndIsAfterAndStartIsBeforeAndStatusIn(
                         bookingDto.getItemId(), bookingDto.getStart(), bookingDto.getEnd(),
                         Set.of(WAITING, APPROVED));
 
@@ -115,8 +115,8 @@ public class BookingServiceImpl implements BookingService{
         BookingState state = getState(stateString);
         List<Booking> bookings;
         switch (state) {
-            case CURRENT -> bookings = bookingRepository.
-                    findByBookerIdAndStartIsBeforeAndEndIsAfter(userId, now, now, sort);
+            case CURRENT -> bookings = bookingRepository
+                    .findByBookerIdAndStartIsBeforeAndEndIsAfter(userId, now, now, sort);
             case PAST -> bookings = bookingRepository
                     .findByBookerIdAndEndIsBefore(userId, now, sort);
             case FUTURE -> bookings = bookingRepository
@@ -141,8 +141,8 @@ public class BookingServiceImpl implements BookingService{
         BookingState state = getState(stateString);
         List<Booking> bookings;
         switch (state) {
-            case CURRENT -> bookings = bookingRepository.
-                    findByItemOwnerIdAndStartIsBeforeAndEndIsAfter(ownerId, now, now, sort);
+            case CURRENT -> bookings = bookingRepository
+                    .findByItemOwnerIdAndStartIsBeforeAndEndIsAfter(ownerId, now, now, sort);
             case PAST -> bookings = bookingRepository
                     .findByItemOwnerIdAndEndIsBefore(ownerId, now, sort);
             case FUTURE -> bookings = bookingRepository
