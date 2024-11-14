@@ -30,14 +30,12 @@ public class ItemMapper {
                 bookings
                         .stream()
                         .filter(b -> b.getEnd().isBefore(LocalDateTime.now()))
-                        .sorted(Comparator.comparing(Booking::getEnd).reversed())
-                        .findFirst();
+                        .max(Comparator.comparing(Booking::getEnd));
         Optional<Booking> nextBooking = bookings.isEmpty() ? Optional.empty() :
                 bookings
                         .stream()
                         .filter(b -> b.getStart().isAfter(LocalDateTime.now()))
-                        .sorted(Comparator.comparing(Booking::getStart))
-                        .findFirst();
+                        .min(Comparator.comparing(Booking::getStart));
         List<CommentDto> commentsDto = comments
                 .stream()
                 .map(ItemMapper::toCommentDto)
@@ -48,8 +46,8 @@ public class ItemMapper {
                 item.getDescription(),
                 item.getAvailable(),
                 item.getRequest() != null ? item.getRequest().getId() : null,
-                lastBooking.isEmpty() ? null : lastBooking.get().getEnd(),
-                nextBooking.isEmpty() ? null : nextBooking.get().getStart(),
+                lastBooking.map(Booking::getEnd).orElse(null),
+                nextBooking.map(Booking::getStart).orElse(null),
                 commentsDto
         );
     }

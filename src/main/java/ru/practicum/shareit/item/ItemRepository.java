@@ -17,8 +17,7 @@ public interface ItemRepository extends JpaRepository<Item, Long>, QuerydslPredi
         BooleanExpression byName = QItem.item.name.containsIgnoreCase(text);
         BooleanExpression byDescription = QItem.item.description.containsIgnoreCase(text);
         BooleanExpression byAvailable = QItem.item.available.isTrue();
-        Iterable<Item> foundItems = findAll(byAvailable.and(byName.or(byDescription)));
-        return foundItems;
+        return findAll(byAvailable.and(byName.or(byDescription)));
     }
 
     default Item getItemById(Long itemId) {

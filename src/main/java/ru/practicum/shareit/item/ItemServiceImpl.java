@@ -95,8 +95,8 @@ public class ItemServiceImpl implements ItemService {
         return itemRepository
                 .findByOwnerId(userId)
                 .stream()
-                .map(i -> ItemMapper.toItemDateDto(i,
-                        bookings.getOrDefault(i, List.of()), comments.getOrDefault(i, List.of())))
+                .map(i -> ItemMapper.toItemDateDto(i, bookings.getOrDefault(i.getId(), List.of()),
+                        comments.getOrDefault(i.getId(), List.of())))
                 .toList();
     }
 
