@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.DuplicatedDataException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.dto.UserUpdateDto;
@@ -35,7 +36,7 @@ public class UserService {
     @Transactional()
     public UserDto update(Long id, UserUpdateDto newUserDto) {
         User newUser = UserMapper.toUser(id, newUserDto);
-        User oldUser = userRepository.getUserById(newUser.getId());
+        User oldUser = getUserById(newUser.getId());
         log.debug("Обновление пользователя с идентификатором " + newUser.getId());
         if (newUser.getName() != null && !newUser.getName().isBlank()) {
             oldUser.setName(newUser.getName());
@@ -53,13 +54,19 @@ public class UserService {
 
     public UserDto getById(Long id) {
         log.debug("Получение пользователя с идентификатором " + id);
-        return UserMapper.toUserDto(userRepository.getUserById(id));
+        return UserMapper.toUserDto(getUserById(id));
     }
 
     @Transactional()
     public UserDto delete(Long id) {
-        User user = userRepository.getUserById(id);
+        User user = getUserById(id);
         userRepository.delete(user);
         return UserMapper.toUserDto(user);
+    }
+
+    public User getUserById(Long userId) {
+        return userRepository
+                .findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден.", userId));
     }
 }

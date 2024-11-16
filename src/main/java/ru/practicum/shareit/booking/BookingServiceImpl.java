@@ -13,9 +13,9 @@ import ru.practicum.shareit.exception.IncorrectDataException;
 import ru.practicum.shareit.exception.NotAuthorizedException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.UnavailableEntityException;
-import ru.practicum.shareit.item.ItemRepository;
+import ru.practicum.shareit.item.ItemService;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
@@ -31,8 +31,8 @@ import static ru.practicum.shareit.booking.BookingStatus.*;
 @Transactional(readOnly = true)
 public class BookingServiceImpl implements BookingService {
 
-    private final ItemRepository itemRepository;
-    private final UserRepository userRepository;
+    private final ItemService itemService;
+    private final UserService userService;
     private final BookingRepository bookingRepository;
 
     @Override
@@ -47,8 +47,8 @@ public class BookingServiceImpl implements BookingService {
             throw new IncorrectDataException("Некорректные сроки бронирования",
                     bookingDto.getEnd().toString());
         }
-        User booker = userRepository.getUserById(userId);
-        Item item = itemRepository.getItemById(bookingDto.getItemId());
+        User booker = userService.getUserById(userId);
+        Item item = itemService.getItemById(bookingDto.getItemId());
         if (!item.getAvailable()) {
             throw new UnavailableEntityException("Вещь недоступна ",
                     item.getId().toString());
@@ -71,7 +71,7 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto approve(Long userId, Long bookingId, boolean approved) {
         log.debug("Подтверждение бронирования");
         try {
-            userRepository.getUserById(userId);
+            userService.getUserById(userId);
         } catch (NotFoundException e) {
             throw new NotAuthorizedException(e.getMessage(),
                     e.getId(), bookingId);
@@ -92,7 +92,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingDto getById(Long userId, Long bookingId) {
         log.debug("Получение бронирования с идентификатором " + bookingId);
-        userRepository.getUserById(userId);
+        userService.getUserById(userId);
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Бронирование не найдено.", bookingId));
         if (!(booking.getItem().getOwner().getId().equals(userId)
@@ -109,7 +109,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingDto> getUserBookings(Long userId, String stateString) {
-        userRepository.getUserById(userId);
+        userService.getUserById(userId);
         Sort sort = Sort.by("end").descending();
         LocalDateTime now = LocalDateTime.now();
         BookingState state = getState(stateString);
@@ -135,7 +135,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingDto> getItemOwnerBookings(Long ownerId, String stateString) {
-        userRepository.getUserById(ownerId);
+        userService.getUserById(ownerId);
         Sort sort = Sort.by("end").descending();
         LocalDateTime now = LocalDateTime.now();
         BookingState state = getState(stateString);

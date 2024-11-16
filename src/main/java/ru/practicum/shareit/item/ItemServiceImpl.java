@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item;
 
+import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -8,10 +9,12 @@ import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exception.IncorrectDataException;
 import ru.practicum.shareit.exception.NotAuthorizedException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.item.model.QItem;
+import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
@@ -30,7 +33,7 @@ import java.util.stream.StreamSupport;
 public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
 
@@ -38,7 +41,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto create(Long userId, ItemDto itemDto) {
         log.debug("Создание новой вещи");
-        User owner = userRepository.getUserById(userId);
+        User owner = userService.getUserById(userId);
         Item item = ItemMapper.toItem(itemDto, owner, null); // TODO fix itemRequest
         return ItemMapper.toItemDto(itemRepository.save(item));
     }
@@ -47,7 +50,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto update(Long userId, Long itemId, ItemUpdateDto newItemDto) {
         log.debug("Обновление вещи с идентификатором " + itemId);
-        Item oldItem = itemRepository.getItemById(itemId);
+        Item oldItem = getItemById(itemId);
         Item newItem = ItemMapper.toItem(newItemDto);
         if (!oldItem.getOwner().getId().equals(userId)) {
             log.debug("Пользователь с идентификатором " + userId +
@@ -71,15 +74,15 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemCommentDto getById(Long userId, Long itemId) {
         log.debug("Получение вещи с идентификатором " + itemId);
-        userRepository.getUserById(userId);
-        return ItemMapper.toItemDateDto(itemRepository.getItemById(itemId), List.of(),
+        userService.getUserById(userId);
+        return ItemMapper.toItemDateDto(getItemById(itemId), List.of(),
                 commentRepository.findAllByItemIdIn(Set.of(itemId)));
     }
 
     @Override
     public Collection<ItemCommentDto> getAllItems(Long userId) {
         log.debug("Поиск вещей пользователя с идентификатором " + userId);
-        userRepository.getUserById(userId);
+        userService.getUserById(userId);
         Map<Long, Item> items = itemRepository
                 .findByOwnerId(userId)
                 .stream()
@@ -106,9 +109,15 @@ public class ItemServiceImpl implements ItemService {
         if (text.isBlank()) {
             return List.of();
         }
-        userRepository.getUserById(userId);
+        userService.getUserById(userId);
+        BooleanExpression byName = QItem.item.name.containsIgnoreCase(text);
+        BooleanExpression byDescription = QItem.item.description.containsIgnoreCase(text);
+        BooleanExpression byAvailable = QItem.item.available.isTrue();
+        BooleanExpression expr = byAvailable.and(byName.or(byDescription));
         return StreamSupport.stream(
-                itemRepository.searchByAvailableAndNameOrDescription(text).spliterator(),
+                itemRepository
+                        .findAll(expr)
+                        .spliterator(),
                         false)
                 .map(ItemMapper::toItemDto)
                 .toList();
@@ -117,8 +126,8 @@ public class ItemServiceImpl implements ItemService {
     @Transactional()
     @Override
     public ItemDto delete(Long userId, Long id) {
-        userRepository.getUserById(userId);
-        Item item = itemRepository.getItemById(id);
+        userService.getUserById(userId);
+        Item item = getItemById(id);
         itemRepository.delete(item);
         return ItemMapper.toItemDto(item);
     }
@@ -126,8 +135,8 @@ public class ItemServiceImpl implements ItemService {
     @Transactional()
     @Override
     public CommentDto comment(Long userId, Long itemId, CreateCommentDto commentDto) {
-        User author = userRepository.getUserById(userId);
-        Item item = itemRepository.getItemById(itemId);
+        User author = userService.getUserById(userId);
+        Item item = getItemById(itemId);
         List<Booking> bookings = bookingRepository
                 .findByBookerIdAndItemIdAndEndIsBefore(userId, itemId, LocalDateTime.now());
         if (bookings.isEmpty()) {
@@ -141,4 +150,12 @@ public class ItemServiceImpl implements ItemService {
         Comment comment = ItemMapper.toComment(commentDto, item, author);
         return ItemMapper.toCommentDto(commentRepository.save(comment));
     }
+
+    @Override
+    public Item getItemById(Long itemId) {
+        return itemRepository
+                .findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Вещь не найдена.", itemId));
+    }
+
 }
