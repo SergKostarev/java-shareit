@@ -4,8 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemUpdateDto;
+import ru.practicum.shareit.item.dto.*;
 
 import java.util.Collection;
 
@@ -31,13 +30,13 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItemById(@RequestHeader("X-Sharer-User-Id") Long userId,
-                               @PathVariable("itemId") Long itemId) {
+    public ItemCommentDto getItemById(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                      @PathVariable("itemId") Long itemId) {
         return itemService.getById(userId, itemId);
     }
 
     @GetMapping
-    public Collection<ItemDto> getAllItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public Collection<ItemCommentDto> getAllItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
         return itemService.getAllItems(userId);
     }
 
@@ -48,8 +47,16 @@ public class ItemController {
     }
 
     @DeleteMapping("/{id}")
-    public ItemDto delete(@PathVariable("id") Long id) {
-        return itemService.delete(id);
+    public ItemDto delete(@RequestHeader("X-Sharer-User-Id") Long userId,
+                          @PathVariable("id") Long id) {
+        return itemService.delete(userId, id);
+    }
+
+    @PostMapping("{itemId}/comment")
+    public CommentDto comment(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                  @PathVariable("itemId") Long itemId,
+                                  @Valid @RequestBody CreateCommentDto commentDto) {
+        return itemService.comment(userId, itemId, commentDto);
     }
 
 }
