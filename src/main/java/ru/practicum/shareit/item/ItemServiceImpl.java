@@ -14,6 +14,8 @@ import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.model.QItem;
+import ru.practicum.shareit.request.RequestService;
+import ru.practicum.shareit.request.model.Request;
 import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.model.User;
 
@@ -34,6 +36,7 @@ public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
     private final UserService userService;
+    private final RequestService requestService;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
 
@@ -42,7 +45,11 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto create(Long userId, ItemDto itemDto) {
         log.debug("Создание новой вещи");
         User owner = userService.getUserById(userId);
-        Item item = ItemMapper.toItem(itemDto, owner, null); // TODO fix itemRequest
+        Request request = null;
+        if (itemDto.getRequestId() != null) {
+            request =requestService.getRequestById(itemDto.getRequestId());
+        }
+        Item item = ItemMapper.toItem(itemDto, owner, request);
         return ItemMapper.toItemDto(itemRepository.save(item));
     }
 

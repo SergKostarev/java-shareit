@@ -4,7 +4,7 @@ import lombok.experimental.UtilityClass;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.model.Request;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
@@ -52,14 +52,14 @@ public class ItemMapper {
         );
     }
 
-    public static Item toItem(ItemDto itemDto, User owner, ItemRequest itemRequest) {
+    public static Item toItem(ItemDto itemDto, User owner, Request request) {
         Item item = new Item();
         item.setId(itemDto.getId());
         item.setName(itemDto.getName());
         item.setDescription(itemDto.getDescription());
         item.setAvailable(itemDto.getAvailable());
         item.setOwner(owner);
-        item.setRequest(itemRequest);
+        item.setRequest(request);
         return item;
     }
 
@@ -87,5 +87,13 @@ public class ItemMapper {
         comment.setItem(item);
         comment.setAuthor(author);
         return comment;
+    }
+
+    public static ItemRequestDto toItemRequestDto(Item item) {
+        return new ItemRequestDto(
+                item.getId(),
+                item.getName(),
+                item.getRequest() != null ? item.getRequest().getId() : null
+        );
     }
 }
