@@ -120,9 +120,9 @@ public class BookingServiceImpl implements BookingService {
             case FUTURE -> bookings = bookingRepository
                     .findByBookerIdAndStartIsAfter(userId, now, sort);
             case WAITING -> bookings = bookingRepository
-                    .findByBookerIdAndStatus(userId, WAITING.ordinal(), sort);
+                    .findByBookerIdAndStatus(userId, WAITING, sort);
             case REJECTED -> bookings = bookingRepository
-                    .findByBookerIdAndStatus(userId, REJECTED.ordinal(), sort);
+                    .findByBookerIdAndStatus(userId, REJECTED, sort);
             default -> bookings = bookingRepository.findByBookerId(userId, sort);
         }
         return bookings
@@ -145,9 +145,9 @@ public class BookingServiceImpl implements BookingService {
             case FUTURE -> bookings = bookingRepository
                     .findByItemOwnerIdAndStartIsAfter(ownerId, now, sort);
             case WAITING -> bookings = bookingRepository
-                    .findByItemOwnerIdAndStatus(ownerId, WAITING.ordinal(), sort);
+                    .findByItemOwnerIdAndStatus(ownerId, WAITING, sort);
             case REJECTED -> bookings = bookingRepository
-                    .findByItemOwnerIdAndStatus(ownerId, REJECTED.ordinal(), sort);
+                    .findByItemOwnerIdAndStatus(ownerId, REJECTED, sort);
             default -> bookings = bookingRepository.findByItemOwnerId(ownerId, sort);
         }
         return bookings

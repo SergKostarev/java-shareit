@@ -16,9 +16,6 @@ import ru.practicum.shareit.user.dto.UserUpdateDto;
 import ru.practicum.shareit.user.model.User;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
 
 @Transactional
 @SpringBootTest
@@ -36,9 +33,11 @@ public class UserServiceTest {
         TypedQuery<User> query = em.createQuery("Select u from User u where u.email = :email", User.class);
         User user = query.setParameter("email", userDto.getEmail())
                 .getSingleResult();
-        assertThat(user.getId(), notNullValue());
-        assertThat(user.getName(), equalTo(userDto.getName()));
-        assertThat(user.getEmail(), equalTo(userDto.getEmail()));
+        Assertions.assertThat(user)
+                .isInstanceOf(User.class)
+                .hasNoNullFieldsOrProperties()
+                .hasFieldOrPropertyWithValue("name", "Иванов")
+                .hasFieldOrPropertyWithValue("email", "some@email.com");
     }
 
     @Test
@@ -51,9 +50,9 @@ public class UserServiceTest {
     }
 
     @Test
-    void getNonExistentUserById_throwNotFoundException() {
-        assertThatThrownBy(() -> {service.getById(2L);
-        }).isInstanceOf(NotFoundException.class);
+    void getNonExistentUserById_throwNotFoundExceptionWhenGetting() {
+        assertThatThrownBy(() -> {service.getById(10L);
+            }).isInstanceOf(NotFoundException.class);
     }
 
     @Test

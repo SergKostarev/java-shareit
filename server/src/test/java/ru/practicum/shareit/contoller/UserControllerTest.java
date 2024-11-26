@@ -11,6 +11,7 @@ import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.UserController;
 import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserUpdateDto;
 
 import java.nio.charset.StandardCharsets;
 
@@ -34,10 +35,11 @@ public class UserControllerTest {
     private MockMvc mvc;
 
     private UserDto userDto = new UserDto(1L,"John","john.doe@mail.com");
+    private UserUpdateDto userUpdateDto = new UserUpdateDto(null,"john2@mail.com");
 
     @Test
     void createUser() throws Exception {
-        when(userService.create(any()))
+        when(userService.create(userDto))
                 .thenReturn(userDto);
         mvc.perform(post("/users")
                         .content(mapper.writeValueAsString(userDto))
@@ -55,7 +57,6 @@ public class UserControllerTest {
         when(userService.getById(any()))
                 .thenReturn(userDto);
         mvc.perform(get("/users/1")
-                        .content(mapper.writeValueAsString(userDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -70,7 +71,6 @@ public class UserControllerTest {
         when(userService.getById(any()))
                 .thenThrow(NotFoundException.class);
         mvc.perform(get("/users/1")
-                        .content(mapper.writeValueAsString(userDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -82,7 +82,6 @@ public class UserControllerTest {
         when(userService.delete(any()))
                 .thenReturn(userDto);
         mvc.perform(delete("/users/1")
-                        .content(mapper.writeValueAsString(userDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -94,10 +93,10 @@ public class UserControllerTest {
 
     @Test
     void updateUser() throws Exception {
-        when(userService.update(any(), any()))
+        when(userService.update(1L, userUpdateDto))
                 .thenReturn(userDto);
         mvc.perform(patch("/users/1")
-                        .content(mapper.writeValueAsString(userDto))
+                        .content(mapper.writeValueAsString(userUpdateDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))

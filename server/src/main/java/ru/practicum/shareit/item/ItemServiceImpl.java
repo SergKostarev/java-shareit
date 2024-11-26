@@ -135,6 +135,13 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto delete(Long userId, Long id) {
         userService.getUserById(userId);
         Item item = getItemById(id);
+        if (!item.getOwner().getId().equals(userId)) {
+            log.debug("Пользователь с идентификатором " + userId +
+                    " не является владельцем вещи с идентификатором " + item.getId()
+                    + ", удаление невозможно");
+            throw new NotAuthorizedException("Недопустимая для пользователя операция",
+                    userId, item.getId());
+        }
         itemRepository.delete(item);
         return ItemMapper.toItemDto(item);
     }

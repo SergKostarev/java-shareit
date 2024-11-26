@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class CreateRequestDto {
-    private Long id;
-    private String description;
+    private final Long id;
+    private final String description;
 }

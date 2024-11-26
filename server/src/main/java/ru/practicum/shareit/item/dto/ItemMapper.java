@@ -93,7 +93,7 @@ public class ItemMapper {
         return new ItemRequestDto(
                 item.getId(),
                 item.getName(),
-                item.getRequest() != null ? item.getRequest().getId() : null
+                item.getOwner().getId()
         );
     }
 }
