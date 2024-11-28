@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import ru.practicum.shareit.exception.DuplicatedDataException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -41,6 +42,13 @@ public class UserServiceTest {
     }
 
     @Test
+    void givenDuplicatedEmailUser_shouldNotCreateNewUser() {
+        assertThatThrownBy(() -> {
+            service.create(makeUserDto("Иванов", "sokolov@email.com"));
+            }).isInstanceOf(DuplicatedDataException.class);
+    }
+
+    @Test
     void getUserById() {
         Assertions.assertThat(service.getById(1L))
                 .isInstanceOf(UserDto.class)
@@ -51,7 +59,8 @@ public class UserServiceTest {
 
     @Test
     void getNonExistentUserById_throwNotFoundExceptionWhenGetting() {
-        assertThatThrownBy(() -> {service.getById(10L);
+        assertThatThrownBy(() -> {
+            service.getById(10L);
             }).isInstanceOf(NotFoundException.class);
     }
 
@@ -72,6 +81,14 @@ public class UserServiceTest {
                 .hasFieldOrPropertyWithValue("id", 1L)
                 .hasFieldOrPropertyWithValue("name", "Иванов")
                 .hasFieldOrPropertyWithValue("email", "some@email.com");
+    }
+
+    @Test
+    void givenDuplicatedEmailUser_shouldNotUpdateUser() {
+        assertThatThrownBy(() -> {
+            service.update(1L,
+                makeUserUpdateDto("Иванов", "sidorov@email.com"));
+            }).isInstanceOf(DuplicatedDataException.class);
     }
 
     private UserDto makeUserDto(String name, String email) {

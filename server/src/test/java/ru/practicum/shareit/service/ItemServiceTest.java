@@ -51,10 +51,20 @@ public class ItemServiceTest {
     }
 
     @Test
+    void givenNonExistentRequest_throwNotFoundException() {
+        ItemDto itemDto = makeItemDto("Вещь",
+                "Описание вещи", true, 10L);
+        assertThatThrownBy(() -> {
+            service.create(1L, itemDto);
+            }).isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
     void givenNonExistentUser_throwNotFoundException() {
         ItemDto itemDto = makeItemDto("Вещь",
                 "Описание вещи", true, null);
-        assertThatThrownBy(() -> {service.create(10L, itemDto);
+        assertThatThrownBy(() -> {
+            service.create(10L, itemDto);
             }).isInstanceOf(NotFoundException.class);
     }
 
@@ -74,7 +84,8 @@ public class ItemServiceTest {
     void givenNotOwnerUser_throwNotAuthorizedExceptionWhenUpdating() {
         ItemUpdateDto itemDto = makeItemUpdateDto(1L,"Вещь",
                 "Описание вещи", true, null);
-        assertThatThrownBy(() -> {service.update(2L, 1L, itemDto);
+        assertThatThrownBy(() -> {
+            service.update(2L, 1L, itemDto);
             }).isInstanceOf(NotAuthorizedException.class);
     }
 
@@ -115,6 +126,12 @@ public class ItemServiceTest {
     }
 
     @Test
+    void givenBlankString_shouldNotFindItems() {
+        Assertions.assertThat(
+                service.search(2L, "").isEmpty());
+    }
+
+    @Test
     void deleteItem() {
         Assertions.assertThat(service.delete(2L, 3L))
                 .isInstanceOf(ItemDto.class)
@@ -127,7 +144,8 @@ public class ItemServiceTest {
 
     @Test
     void givenNotOwnerUser_throwNotAuthorizedExceptionWhenDeleting() {
-        assertThatThrownBy(() -> {service.delete(1L, 3L);
+        assertThatThrownBy(() -> {
+            service.delete(1L, 3L);
             }).isInstanceOf(NotAuthorizedException.class);
     }
 
@@ -145,7 +163,8 @@ public class ItemServiceTest {
 
     @Test
     void givenUserWithNoBooking_throwNotAuthorizedExceptionWhenComment() {
-        assertThatThrownBy(() -> {service.comment(
+        assertThatThrownBy(() -> {
+            service.comment(
                 2L, 3L, makeCreateCommentDto("Не очень"));
             }).isInstanceOf(IncorrectDataException.class);
     }

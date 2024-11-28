@@ -10,24 +10,19 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.request.RequestController;
 import ru.practicum.shareit.request.RequestService;
-import ru.practicum.shareit.request.dto.CreateRequestDto;
 import ru.practicum.shareit.request.dto.RequestDto;
 import ru.practicum.shareit.request.dto.RequestItemDto;
-import ru.practicum.shareit.user.UserService;
-import ru.practicum.shareit.user.dto.UserDto;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = RequestController.class)
@@ -44,14 +39,13 @@ public class RequestControllerTest {
 
     private RequestDto requestDto = new RequestDto(1L,"Описание",1L,
             LocalDateTime.of(2024, 1, 1, 23, 59, 05));
-    private CreateRequestDto createRequestDto = new CreateRequestDto(null,"Описание");
 
     @Test
     void createRequest() throws Exception {
-        when(requestService.create(1L, createRequestDto))
+        when(requestService.create(any(), any()))
                 .thenReturn(requestDto);
         mvc.perform(post("/requests")
-                        .content(mapper.writeValueAsString(createRequestDto))
+                        .content(mapper.writeValueAsString(requestDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .header("X-Sharer-User-Id", 1)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -87,7 +81,7 @@ public class RequestControllerTest {
                 LocalDateTime.of(2024, 1, 1, 23, 59, 05),
                 new ArrayList<>());
         when(requestService.getRequest(any(), any())).thenReturn(request);
-        mvc.perform(get("/requests/1")
+        mvc.perform(get("/requests/{requestId}", "1")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .header("X-Sharer-User-Id", 1)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -100,11 +94,12 @@ public class RequestControllerTest {
     }
 
     @Test
-    void getNonExistentRequestById_shouldThrowNotFoundException() throws Exception {
+    void givenNotFoundExceptionInGetRequest_statusIsFound() throws Exception {
         when(requestService.getRequest(any(), any()))
                 .thenThrow(NotFoundException.class);
-        mvc.perform(get("/users/1")
+        mvc.perform(get("/requests/{requestId}", "1")
                         .characterEncoding(StandardCharsets.UTF_8)
+                        .header("X-Sharer-User-Id", 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());

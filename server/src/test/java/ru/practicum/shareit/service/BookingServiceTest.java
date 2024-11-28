@@ -60,21 +60,23 @@ public class BookingServiceTest {
     @Test
     void givenIncorectTime_shouldNotCreateBooking() {
         CreateBookingDto createBookingDto = makeCreateBookingDto(end, start, 4L);
-        assertThatThrownBy(() -> {service.create(1L, createBookingDto);
+        assertThatThrownBy(() -> {
+            service.create(1L, createBookingDto);
             }).isInstanceOf(IncorrectDataException.class);
     }
 
     @Test
     void givenUnavailableItem_shouldNotCreateBooking() {
         CreateBookingDto createBookingDto = makeCreateBookingDto(3L);
-        assertThatThrownBy(() -> {service.create(1L, createBookingDto);
+        assertThatThrownBy(() -> {
+            service.create(1L, createBookingDto);
             }).isInstanceOf(UnavailableEntityException.class);
     }
 
     @Test
     void approveBooking() {
-        LocalDateTime start = LocalDateTime.of(2025, 12, 29, 23, 59, 59);
-        LocalDateTime end = LocalDateTime.of(2025, 12, 30, 23, 59, 59);
+        LocalDateTime start = LocalDateTime.of(2125, 12, 29, 23, 59, 59);
+        LocalDateTime end = LocalDateTime.of(2125, 12, 30, 23, 59, 59);
         service.approve(2L, 3L, true);
         Booking booking = em.find(Booking.class,3L);
         User booker = em.find(User.class,1L);
@@ -91,33 +93,44 @@ public class BookingServiceTest {
     }
 
     @Test
-    void givenNonExistentBooking_shouldNotUpdateBooking() {
-        assertThatThrownBy(() -> {service.approve(2L, 10L, true);
+    void givenNonExistentBooking_shouldNotApproveBooking() {
+        assertThatThrownBy(() -> {
+            service.approve(2L, 10L, true);
             }).isInstanceOf(NotFoundException.class);
     }
 
     @Test
-    void givenNotOwnerUser_shouldNotUpdateBooking() {
-        assertThatThrownBy(() -> {service.approve(1L, 3L, true);
+    void givenNotOwnerUser_shouldNotApproveBooking() {
+        assertThatThrownBy(() -> {
+            service.approve(1L, 3L, true);
+            }).isInstanceOf(NotAuthorizedException.class);
+    }
+
+    @Test
+    void givenNonExistentUser_shouldNotApproveBooking() {
+        assertThatThrownBy(() -> {
+            service.approve(10L, 3L, true);
             }).isInstanceOf(NotAuthorizedException.class);
     }
 
     @Test
     void givenNonExistentBooking_shouldNotGetBooking() {
-        assertThatThrownBy(() -> {service.getById(1L, 10L);
+        assertThatThrownBy(() -> {
+            service.getById(1L, 10L);
             }).isInstanceOf(NotFoundException.class);
     }
 
     @Test
     void givenNotOwnerUser_shouldNotGetBooking() {
-        assertThatThrownBy(() -> {service.getById(3L, 3L);
+        assertThatThrownBy(() -> {
+            service.getById(3L, 3L);
             }).isInstanceOf(NotAuthorizedException.class);
     }
 
     @Test
     void getById() {
-        LocalDateTime start = LocalDateTime.of(2025, 12, 29, 23, 59, 59);
-        LocalDateTime end = LocalDateTime.of(2025, 12, 30, 23, 59, 59);
+        LocalDateTime start = LocalDateTime.of(2125, 12, 29, 23, 59, 59);
+        LocalDateTime end = LocalDateTime.of(2125, 12, 30, 23, 59, 59);
         ItemBookingDto itemBookingDto = new ItemBookingDto(4L, "Тестовая вещь");
         UserBookingDto userBookingDto = new UserBookingDto(1L);
         BookingDto booking = service.getById(1L, 3L);
@@ -151,6 +164,24 @@ public class BookingServiceTest {
     }
 
     @Test
+    void getCurrentBookings() {
+        Assertions.assertThat(
+                service.getUserBookings(1L, BookingState.CURRENT)).hasSize(0);
+    }
+
+    @Test
+    void getFutureBookings() {
+        Assertions.assertThat(
+                service.getUserBookings(1L, BookingState.FUTURE)).hasSize(1);
+    }
+
+    @Test
+    void getRejectedBookings() {
+        Assertions.assertThat(
+                service.getUserBookings(1L, BookingState.REJECTED)).hasSize(0);
+    }
+
+    @Test
     void getItemOwnerAllBookings() {
         Assertions.assertThat(
                 service.getItemOwnerBookings(2L, BookingState.ALL)).hasSize(3);
@@ -169,17 +200,37 @@ public class BookingServiceTest {
     }
 
     @Test
+    void getItemOwnerCurrentBookings() {
+        Assertions.assertThat(
+                service.getItemOwnerBookings(2L, BookingState.CURRENT)).hasSize(0);
+    }
+
+    @Test
+    void getItemOwnerFutureBookings() {
+        Assertions.assertThat(
+                service.getItemOwnerBookings(2L, BookingState.FUTURE)).hasSize(1);
+    }
+
+    @Test
+    void getItemOwnerRejectedBookings() {
+        Assertions.assertThat(
+                service.getItemOwnerBookings(2L, BookingState.REJECTED)).hasSize(0);
+    }
+
+    @Test
     void givenAlreadyTakenTime_shouldNotCreateBooking() {
-        LocalDateTime start = LocalDateTime.of(2025, 12, 30, 21, 55, 00);
-        LocalDateTime end = LocalDateTime.of(2025, 12, 30, 23, 55, 00);
+        LocalDateTime start = LocalDateTime.of(2125, 12, 30, 21, 55, 00);
+        LocalDateTime end = LocalDateTime.of(2125, 12, 30, 23, 55, 00);
         CreateBookingDto createBookingDto = makeCreateBookingDto(start, end,4L);
-        assertThatThrownBy(() -> {service.create(1L, createBookingDto);
+        assertThatThrownBy(() -> {
+            service.create(1L, createBookingDto);
             }).isInstanceOf(UnavailableEntityException.class);
     }
 
     CreateBookingDto makeCreateBookingDto(Long itemId) {
         return new CreateBookingDto(null, start, end, itemId);
     }
+
     CreateBookingDto makeCreateBookingDto(LocalDateTime start, LocalDateTime end, Long itemId) {
         return new CreateBookingDto(null, start, end, itemId);
     }

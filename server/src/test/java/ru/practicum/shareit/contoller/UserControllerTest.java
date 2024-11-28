@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.practicum.shareit.exception.DuplicatedDataException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.UserController;
 import ru.practicum.shareit.user.UserService;
@@ -53,10 +54,22 @@ public class UserControllerTest {
     }
 
     @Test
+    void givenDuplicatedDataExceptionInCreate_statusIsBadRequest() throws Exception {
+        when(userService.create(userDto))
+                .thenThrow(DuplicatedDataException.class);
+        mvc.perform(post("/users")
+                        .content(mapper.writeValueAsString(userDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
     void getUserById() throws Exception {
         when(userService.getById(any()))
                 .thenReturn(userDto);
-        mvc.perform(get("/users/1")
+        mvc.perform(get("/users/{id}", "1")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -67,10 +80,10 @@ public class UserControllerTest {
     }
 
     @Test
-    void getNonExistentUserById_throwNotFoundException() throws Exception {
+    void givenNotFoundExceptionInGetById_statusIsFound() throws Exception {
         when(userService.getById(any()))
                 .thenThrow(NotFoundException.class);
-        mvc.perform(get("/users/1")
+        mvc.perform(get("/users/{id}", "1")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -81,7 +94,7 @@ public class UserControllerTest {
     void deleteUser() throws Exception {
         when(userService.delete(any()))
                 .thenReturn(userDto);
-        mvc.perform(delete("/users/1")
+        mvc.perform(delete("/users/{id}", "1")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -105,4 +118,17 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.name", is(userDto.getName())))
                 .andExpect(jsonPath("$.email", is(userDto.getEmail())));
     }
+
+    @Test
+    void givenDuplicatedDataExceptionInUodate_statusIsBadRequest() throws Exception {
+        when(userService.update(1L, userUpdateDto))
+                .thenThrow(DuplicatedDataException.class);
+        mvc.perform(patch("/users/1")
+                        .content(mapper.writeValueAsString(userUpdateDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict());
+    }
+
 }

@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import ru.practicum.shareit.user.model.User;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Getter
@@ -29,7 +29,7 @@ public class Comment {
     @JoinColumn(name = "author_id")
     private User author;
 
-    private LocalDate created = LocalDate.now();
+    private LocalDateTime created = LocalDateTime.now();
 
     @Override
     public boolean equals(Object o) {

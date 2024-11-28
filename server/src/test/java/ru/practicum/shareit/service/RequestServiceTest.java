@@ -16,9 +16,6 @@ import ru.practicum.shareit.request.dto.RequestItemDto;
 import ru.practicum.shareit.request.model.Request;
 import ru.practicum.shareit.user.model.User;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 @Transactional
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -30,7 +27,7 @@ public class RequestServiceTest {
 
     @Test
     void createRequest() {
-        CreateRequestDto requestDto = makeCreateRequestDto( "Запрос");
+        CreateRequestDto requestDto = makeCreateRequestDto("Запрос");
         service.create(1L, requestDto);
         TypedQuery<Request> query = em.createQuery(
                 "Select r from Request r where r.description = :description", Request.class);
