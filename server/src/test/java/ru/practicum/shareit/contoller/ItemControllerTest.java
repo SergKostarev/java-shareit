@@ -170,6 +170,20 @@ public class ItemControllerTest {
     }
 
     @Test
+    void search() throws Exception {
+        when(itemService.search(any(), any()))
+                .thenReturn(Arrays.asList(itemDto, itemDto2));
+        mvc.perform(get("/items/search")
+                        .param("text", "Вещь")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("X-Sharer-User-Id", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().json(mapper.writeValueAsString(Arrays.asList(itemDto, itemDto2))));
+    }
+
+    @Test
     void comment() throws Exception {
         when(itemService.comment(any(), any(), any()))
                 .thenReturn(commentDto);
