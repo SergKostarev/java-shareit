@@ -116,19 +116,19 @@ public class ItemServiceTest {
     @Test
     void givenNotPresentString_shouldNotFindItem() {
         Assertions.assertThat(
-                service.search(2L, "Некая вещь").isEmpty());
+                service.search(2L, "Некая вещь")).hasSize(0);
     }
 
     @Test
     void givenPresentString_shouldNotFindUnavailableItem() {
         Assertions.assertThat(
-                service.search(2L, "Описание вещи по запросу").isEmpty());
+                service.search(2L, "Описание вещи по запросу")).hasSize(0);
     }
 
     @Test
     void givenBlankString_shouldNotFindItems() {
         Assertions.assertThat(
-                service.search(2L, "").isEmpty());
+                service.search(2L, "")).hasSize(0);
     }
 
     @Test
